@@ -7,7 +7,7 @@ from datetime import datetime
 import tempfile
 
 # Accesarea variabilei de mediu
-credentials_content = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_CONTENT')
+credentials_content = st.secrets['GOOGLE_APPLICATION_CREDENTIALS_CONTENT']
 
 # Crearea unui fișier temporar pentru cheile de autentificare
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp_file:
