@@ -4,21 +4,28 @@ import streamlit as st
 import random
 from google.cloud import storage
 from datetime import datetime
+import tempfile
+
+# Accesarea variabilei de mediu
+credentials_content = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_CONTENT')
+
+# Crearea unui fișier temporar pentru cheile de autentificare
+with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp_file:
+    temp_file.write(credentials_content.encode())
+    temp_file_name = temp_file.name
 
 # Initializare
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'ServiceKey_GoogleCloud.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_name
 
 storage_client = storage.Client()
 bucket_name = 'sondaj1_bucket'
 bucket = storage_client.bucket(bucket_name)
-
 
 def download_json_from_gcs(bucket_name, json_filename):
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(json_filename)
     data = blob.download_as_text()
     return json.loads(data)
-
 
 json_filename = "expressions.json"
 data = download_json_from_gcs(bucket_name, json_filename)
@@ -49,7 +56,6 @@ if "responses" not in st.session_state:
 
 if "initial_images" not in st.session_state:
     st.session_state.initial_images = {}
-
 
 # Funcție pentru afișarea imaginilor și radio button-urilor
 def afiseaza_metafore(metafore_imagini):
@@ -84,7 +90,6 @@ def afiseaza_metafore(metafore_imagini):
         elif selected_option is not None:
             st.session_state.responses[metafora["text"]] = [label_to_url[selected_option]]
 
-
 # Afișarea metaforelor cu imaginile și radio button-urile
 afiseaza_metafore(data)
 
@@ -103,4 +108,4 @@ if st.button('Trimite răspunsurile'):
     responses_blob.upload_from_filename(responses_filename)
     responses_blob.make_public()  # Opțional: face fișierul JSON public
 
-    st.write("Răspunsurile au fost trimise. Mulțumesc pentru timpul acordat!")
+    st.write("Răspunsurile au fost trimise. Mulțumim pentru participare!")
